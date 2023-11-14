@@ -1,12 +1,13 @@
 const db = require("./config/connection.js");
-
 const viewAllDepartments = () => {
-    db.query('SELECT * FROM deparment', (err, results) => {
+    db.query('SELECT * FROM department', (err, results) => {
         return results;
     });
-
+};
+const addDepartment = (name) => {
+    db.query('INSERT INTO departments (name) VALUES (?)', [name], (err, results) => {
+        return results;
+    });
 };
 
-const addDepartment = () => {
-    db.query('INSERT INTO ')
-}
+module.exports = { viewAllDepartments, addDepartment };

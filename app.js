@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
-const db = require("./config/connection.js");
-const { viewAllDepartments } = require("./controllers/departmentController.js");
+const db = require("./config/connections");
+//const { viewAllDepartments, addDepartment } = require("./controllers/departmentController.js");
+require("console.table")
 db.authenticate().then(() => {
     console.log("Database connected...");
     runApp()
@@ -12,45 +13,51 @@ inquirer
             type: "list",
             message: "Please select one from below:",
             choices: [
-                "View All Employees",,
-                "Add Employee",
-                "View All Roles",
-                "Add Role",
-                "Update Employee Role",
-                "View All Departments",
-                "Add Department"
+                "ViewAllEmployees",
+                "AddEmployee",
+                "ViewAllRoles",
+                "AddRole",
+                "UpdateEmployeeRole",
+                "ViewAllDepartments",
+                "AddDepartment",
             ],
             name: "start",
         },
-    ]).then((answer) => {
+    ]).then((answer) => { console.log(answer.start)
         switch (answer.start) {
-            case "View All Employees":
+            case "ViewAllEmployees":
                 viewAllEmployees();
                 break;
-            case "Add Employee":
+            case "AddEmployee":
                 addEmployee();
                 break;
-            case "View All Roles":
+            case "ViewAllRoles":
                 viewAllRoles();
                 break;
-            case "Add Role":
+            case "AddRole":
                 addRole();
                 break;
-            case "Update Employee Role":
+            case "UpdateEmployeeRole":
                 updateEmployeeRole();
                 break;
-            case "View All Departments":
+            case "ViewAllDepartments":
                 viewAllDepartments();
                 break;
-            case "Add Department":
+            case "AddDepartment":
                 addDepartment();
                 break;
         }
     });
 }
+function viewAllDepartments() {
+    db.query('SELECT * FROM departments', function (err, results){
+        if(err) {
+            console.log(err)
+        }
+        console.table(results), runApp();
+    });
 
-
-
+}
 
 
 
