@@ -1,12 +1,13 @@
 const inquirer = require("inquirer");
-const db = require("./config/connections");
-
+const mysql = require('mysql2')
 
 require("console.table")
-db.authenticate().then(() => {
-    console.log("Database connected...");
-    runApp()
-}).catch(err => console.log("Error: " + err));
+const db = mysql.createConnection({
+  user: 'root', //process.env.DB_USER,
+  password: 'password', //process.env.DB_PASSWORD,
+  database: 'employee_db',
+  host: '127.0.0.1', 
+});
 function runApp() 
 {
 inquirer
@@ -25,6 +26,7 @@ inquirer
             ],
             name: "start"
         },
+        //another way to do an if statment (condition)
     ]).then((answer) => { console.log(answer.start)
         switch (answer.start) {
             case "ViewAllEmployees":
@@ -51,25 +53,26 @@ inquirer
         }
     });
    function viewAllDepartments(){
-        const results =  db.query('SELECT * FROM departments');
-        console.table(results);
-        runApp();    
+        const results =  db.query('SELECT * FROM departments', function(err, results) {
+          if(err) {
+            console.log(err)
+          } 
+          console.table(results),
+        runApp(); 
+        });
+          
     }
 
     function viewAllEmployees() {
         // Query to select all employees from the 'employees' table
+        console.log("i'm here")
         db.query('SELECT * FROM employees', function (err, results) {
             if (err) {
                 console.log(err);
             } else {
-                // Log each row of the results to the console
-                results.forEach(row => {
-                    console.log(row);
-                });
+              console.table(results), runApp();
             }
-    
-            // Continue running the main application after displaying employees
-            runApp();
+  
         });
     }
 
@@ -117,17 +120,21 @@ function addEmployee() {
         ])
         .then((answers) => {
             // Extract answers
-            const { first_name, last_name, role_id, manager_id } = answers;
+            const firstName = answers.first_name
+            const lastName = answers.last_name
+            const roleId = answers.role_id
+            const managerId = answers.manager_id 
 
-            // Use the extracted data to perform your database insertion logic here
+            db.query('INSERT INTO employees (first_name, last_name, role_id, manager_id) values (?,?,?,?)', [firstName, lastName, roleId, managerId], function(err, results) {
+              if(err) {
+                console.log(err)
 
-            // Continue running the main application
-            runApp();
+              }
+              viewAllEmployees(), runApp()
+            })
+
         });
-}
-
-// Export the function for use in other parts of your application
-module.exports = addEmployee;
+};
 
 //add role function
 function addRole() {
@@ -162,9 +169,7 @@ function addRole() {
           }
         );
       });
-  }
-  
-  module.exports = addRole;
+  };
   
   //add department function
   function addDepartment() {
@@ -189,7 +194,6 @@ function addRole() {
           }
         );
       });
-  }
-  
-  module.exports = addDepartment;
+  };
 };
+runApp();
